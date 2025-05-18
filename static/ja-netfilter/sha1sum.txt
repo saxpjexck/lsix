@@ -1,0 +1,11 @@
+2a723c2ef30be4a5c167c6639bf9ec0b9c7e7ca2  ./ja-netfilter.jar
+4e8693b5a7a3837cf7f6db0c4f1316f376d34721  ./plugins-jetbrains/dns.jar
+729d00e4fa04ca49c00b5b6aa60706dfadd5644e  ./plugins-jetbrains/hideme.jar
+26ee7577969265ff77a7fd786bcb707fe21a3d6b  ./plugins-jetbrains/power.jar
+b1bebbee8d98218db5794f596001b8b7427ae0c7  ./plugins-jetbrains/url.jar
+229dd5a5de89bd6fe5fbf5f0c2768895802d7127  ./plugins-jetbrains/native.jar
+2296094cc5611a7707d5aad9e152f0388822b19f  ./config-jetbrains/dns.conf
+77af4f5d6267e6cc0dcf46763783c31eb9e3d99a  ./config-jetbrains/url.conf
+0f73b337faafeddc46cb0682075e47a6e725ca5e  ./config-jetbrains/power.conf
+7d85e04e8c671c86a163dc1a47a24961d12be76a  ./config-jetbrains/native.conf
+
