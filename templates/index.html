@@ -1,0 +1,556 @@
+{{define "/index.html"}}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="utf-8" />
+    <link href="static/css/common.css" rel="stylesheet" type="text/css" />
+    <link href="static/css/index.css" rel="stylesheet" type="text/css" />
+    <link href="static/css/custom.css" rel="stylesheet" type="text/css" />
+    <title>{{.title}}</title>
+    <script>
+      function copyToClipboard(button) {
+        const code = button.parentElement;
+        const clone = code.cloneNode(true);
+        const btn = clone.querySelector("button");
+        if (btn) btn.remove();
+        const text = clone.textContent.trim();
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard
+            .writeText(text)
+            .then(() => {
+              button.textContent = "Copyed";
+              setTimeout(() => (button.textContent = "Copy"), 2000);
+            })
+            .catch(() => {
+              const textarea = document.createElement("textarea");
+              textarea.value = text;
+              textarea.style.position = "fixed";
+              textarea.style.opacity = "0";
+              document.body.appendChild(textarea);
+              textarea.focus();
+              textarea.select();
+              try {
+                const success = document.execCommand("copy");
+                button.textContent = success ? "Copyed" : "Copy failed";
+              } catch (e) {
+                button.textContent = "Copy failed";
+              }
+              setTimeout(() => (button.textContent = "Copy"), 2000);
+              document.body.removeChild(textarea);
+            });
+        } else {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+          try {
+            const success = document.execCommand("copy");
+            button.textContent = success ? "Copyed" : "Copy failed";
+          } catch (e) {
+            button.textContent = "Copy failed";
+          }
+          setTimeout(() => (button.textContent = "Copy"), 2000);
+          document.body.removeChild(textarea);
+        }
+      }
+    </script>
+    <script>
+      function filterCards() {
+        const keyword = document
+          .getElementById("search-box")
+          .value.toLowerCase();
+        const cards = document.querySelectorAll(".ides-languages-product-card");
+
+        cards.forEach((card) => {
+          const textContent = card.textContent.toLowerCase();
+          if (textContent.includes(keyword)) {
+            card.style.display = "";
+          } else {
+            card.style.display = "none";
+          }
+        });
+      }
+    </script>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        if (localStorage.getItem("licenseInfo") === null) {
+          document.getElementById("mask").style.display = "block";
+          document.getElementById("form").style.display = "block";
+        }
+      });
+      window.submitLicenseInfo = function () {
+        let licenseeName = document.getElementById("licenseeName").value;
+        let assigneeName = document.getElementById("assigneeName").value;
+        let expiryDate = document.getElementById("expiryDate").value;
+        let licenseInfo = {
+          licenseeName: licenseeName,
+          assigneeName: assigneeName,
+          expiryDate: expiryDate,
+        };
+        localStorage.setItem("licenseInfo", JSON.stringify(licenseInfo));
+        document.getElementById("mask").style.display = "none";
+        document.getElementById("form").style.display = "none";
+      };
+      window.showLicenseForm = function () {
+        let licenseInfo = localStorage.getItem("licenseInfo");
+        if (licenseInfo !== null) {
+          licenseInfo = JSON.parse(licenseInfo);
+          document.getElementById("licenseeName").value =
+            licenseInfo.licenseeName;
+          document.getElementById("assigneeName").value =
+            licenseInfo.assigneeName;
+          document.getElementById("expiryDate").value = licenseInfo.expiryDate;
+        } else {
+          document.getElementById("licenseeName").value = "{{.licenseeName}}";
+          document.getElementById("assigneeName").value = "{{.assigneeName}}";
+          document.getElementById("expiryDate").value = "{{.expiryDate}}";
+        }
+        document.getElementById("mask").style.display = "block";
+        document.getElementById("form").style.display = "block";
+      };
+      function showInfo() {
+        document.getElementById("mask-info").style.display = "block";
+        document.getElementById("form-info").style.display = "block";
+      }
+      function closeInfo() {
+        document.getElementById("mask-info").style.display = "none";
+        document.getElementById("form-info").style.display = "none";
+      }
+    </script>
+    <script>
+      function fallbackCopyText(text, target) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        try {
+          const successful = document.execCommand("copy");
+          if (successful) {
+            showTooltip(target, "License copied! ✅");
+          } else {
+            showTooltip(target, "Copy failed, please copy manually");
+          }
+        } catch (err) {
+          showTooltip(target, "Copy failed:" + err);
+        }
+
+        document.body.removeChild(textarea);
+      }
+      function showTooltip(target, message) {
+        let tooltip = document.createElement("div");
+        tooltip.textContent = message;
+        tooltip.style.position = "absolute";
+        tooltip.style.backgroundColor = "#333";
+        tooltip.style.color = "#fff";
+        tooltip.style.padding = "4px 8px";
+        tooltip.style.borderRadius = "4px";
+        tooltip.style.fontSize = "12px";
+        tooltip.style.zIndex = "1000";
+        tooltip.style.whiteSpace = "nowrap";
+
+        document.body.appendChild(tooltip);
+
+        const rect = target.getBoundingClientRect();
+        tooltip.style.left = `${rect.left + rect.width / 2}px`;
+        tooltip.style.top = `${rect.top + window.scrollY - 30}px`;
+
+        setTimeout(() => tooltip.remove(), 1500);
+      }
+      window.copyLicense = async function (e) {
+        while (localStorage.getItem("licenseInfo") === null) {
+          document.getElementById("mask").style.display = "block";
+          document.getElementById("form").style.display = "block";
+          await new Promise((r) => setTimeout(r, 1000));
+        }
+
+        let licenseInfo = JSON.parse(localStorage.getItem("licenseInfo"));
+        let codes = e.closest(".card").dataset.productCodes.split(",");
+        let products = codes.map((code) => ({
+          code,
+          fallbackDate: licenseInfo.expiryDate,
+          paidUpTo: licenseInfo.expiryDate,
+        }));
+
+        let data = {
+          licenseeName: licenseInfo.licenseeName,
+          assigneeName: licenseInfo.assigneeName,
+          assigneeEmail: "",
+          licenseRestriction: "",
+          checkConcurrentUse: false,
+          products: products,
+          metadata: "0120230102PPAA013009",
+          hash: "41472961/0:1563609451",
+          gracePeriodDays: 7,
+          autoProlongated: true,
+          isAutoProlongated: true,
+        };
+
+        let resp = await fetch("/generateLicense", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }).then((response) => response.json());
+
+        if (resp.license) {
+          const card = e.closest(".card");
+          const licenseElement = card.querySelector(".license-key");
+          licenseElement.textContent = resp.license;
+
+          const licenseKey = resp.license.trim();
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard
+              .writeText(licenseKey)
+              .then(() => {
+                showTooltip(card, "License copied! ✅");
+              })
+              .catch(() => {
+                fallbackCopyText(licenseKey, card);
+              });
+          } else {
+            fallbackCopyText(licenseKey, card);
+          }
+        } else {
+          console.error("No license found in response", resp);
+        }
+      };
+    </script>
+  </head>
+
+  <body class="body-adaptive page-color-lilac-purple wt-primary-map">
+    <div id="ide-page">
+      <div id="mask"></div>
+      <div id="form">
+        <div class="form">
+          <div class="title">Licensee Information</div>
+          <div class="subtitle">Please enter licensee information</div>
+          <div class="input-container ic1">
+            <input
+              id="licenseeName"
+              class="input"
+              type="text"
+              placeholder=" "
+              value="{{.licenseeName}}"
+            />
+            <div class="cut"></div>
+            <label for="licenseeName" class="placeholder">licenseeName</label>
+          </div>
+          <div class="input-container ic2">
+            <input
+              id="assigneeName"
+              class="input"
+              type="text"
+              placeholder=" "
+              value="{{.assigneeName}}"
+            />
+            <div class="cut"></div>
+            <label for="assigneeName" class="placeholder">assigneeName</label>
+          </div>
+          <div class="input-container ic2">
+            <input
+              id="expiryDate"
+              class="input"
+              type="text"
+              placeholder=""
+              value="{{.expiryDate}}"
+            />
+            <div class="cut cut-short"></div>
+            <label for="expiryDate" class="placeholder">expiryDate</label>
+          </div>
+          <button class="submit" onclick="submitLicenseInfo(this)">
+            submit
+          </button>
+        </div>
+      </div>
+
+      <div id="mask-info"></div>
+      <div id="form-info">
+        <div class="form-content">
+          <div class="title">Instructions for use</div>
+          <strong
+            >"Before activation, you need to modify the vmoptions parameter and
+            restart the software"</strong
+          >
+          <p>
+            Open the software and press <strong>"Ctrl+Shift+A"</strong>，enter
+            <strong>"Edit Custom VM Options"</strong> And return
+          </p>
+          Or open the software and click <strong>"Settings"</strong> Click
+          <strong>"Edit Custom VM Options"</strong>
+          <p>Or manually open the ".vmoptions" file, such as:</p>
+          <pre
+            class="code-block"
+          ><code>- windows: "%APPDATA%\JetBrains\GoLand2025.1\goland64.exe.vmoptions" 
+- macOS: "~/Library/Application Support/JetBrains/GoLand2025.1/goland.vmoptions"
+- Linux: "~/.config/JetBrains/GoLand2025.1/goland64.vmoptions"
+</code></pre>
+          <p>
+            ".vmoptions" Add the following content to the file,<strong
+              >Save and restart the software</strong
+            >Then fill in the activation code:
+          </p>
+          <pre
+            class="code-block"
+          ><code>--add-opens=java.base/jdk.internal.org.objectweb.asm=ALL-UNNAMED
+--add-opens=java.base/jdk.internal.org.objectweb.asm.tree=ALL-UNNAMED
+-javaagent:{{.jaNetfilter}}=jetbrains<button class="copy-button" onclick="copyToClipboard(this)">Copy</button>
+</code></pre>
+
+          <style>
+            .copy-button {
+              position: absolute;
+              top: 0;
+              right: 0;
+              background-color: #04aa6d;
+              border: none;
+              color: white;
+              padding: 8px 16px;
+              text-align: center;
+              text-decoration: none;
+              border-radius: 8px;
+              cursor: pointer;
+              font-size: 14px;
+              transition: background-color 0.3s ease;
+              z-index: 10;
+              width: 90px;
+              height: 40px;
+              white-space: nowrap;
+              overflow: hidden;
+            }
+
+            .copy-button:hover {
+              background-color: #057e47;
+            }
+
+            .code-block {
+              position: relative;
+              background-color: #f5f5f5;
+              color: #333;
+              padding: 20px;
+              border-radius: 5px;
+              font-family: "Courier New", Courier, monospace;
+              font-size: 14px;
+              white-space: pre-wrap;
+              word-wrap: break-word;
+              border: 1px solid #ddd;
+            }
+          </style>
+          <button class="submit" onclick="closeInfo()">close</button>
+        </div>
+      </div>
+      <section class="wt-section find-ide-section background-black">
+        <header class="search-container" style="margin-bottom: 20px; gap: 10px">
+          <input
+            type="text"
+            id="search-box"
+            class="search-input"
+            placeholder="Search for IDE or plugin..."
+            oninput="filterCards()"
+          />
+
+          <button
+            class="jetbra-button settings-icon"
+            onclick="showLicenseForm()"
+          ></button>
+          <style>
+            .settings-icon {
+              position: relative;
+              background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z'%3E%3C/path%3E%3Ccircle cx='12' cy='12' r='3'%3E%3C/circle%3E%3C/svg%3E");
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: 24px;
+            }
+          </style>
+          <button class="jetbra-button info-icon" onclick="showInfo()"></button>
+          <style>
+            .info-icon {
+              position: relative;
+              background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cpath d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3'%3E%3C/path%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'%3E%3C/line%3E%3C/svg%3E");
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: 24px;
+            }
+          </style>
+        </header>
+        <div class="wt-container wt-offset-top-96">
+          <div class="wt-offset-top-48">
+            <h2
+              class="_rs-h2_19db458_1 _rs-typography_theme_dark_19db458_1 _rs-text_hardness_auto_19db458_1 wt-offset-top-96"
+            >
+              Choose the IDE
+            </h2>
+            <div
+              class="wt-row wt-row_size_m ide-products-section jb-offset-top-16 jb-offset-top-sm-48"
+              id="ide-products-section"
+            >
+              {{range .apps}}
+              <a
+                data-product="{{.Name}}"
+                data-product-codes="{{.Code}}"
+                onclick="copyLicense(this)"
+                class="card wt-col-4 wt-col-md-6 wt-col-sm-12 wt-offset-top-32 ides-languages-product-card"
+                ><div
+                  class="wt-row wt-row_size_m ides-languages-product-card__wrap"
+                >
+                  <div class="wt-col-inline">
+                    <div class="wt-row wt-row_size_m wt-row_nowrap">
+                      <div
+                        class="wt-col-inline ides-languages-product-card__icon"
+                      >
+                        <div
+                          class="icon"
+                          role="img"
+                          style="background-image: url('{{.Icon}}')"
+                        ></div>
+                      </div>
+                      <div class="wt-col-inline">
+                        <div
+                          class="wt-row wt-row_size_s wt-row_align-items_center"
+                        >
+                          <div class="wt-col-inline">
+                            <h3
+                              class="_rs-h3_19db458_1 _rs-typography_theme_dark_19db458_1 _rs-text_hardness_auto_19db458_1"
+                            >
+                              {{.Name}} {{if .IsFree}}
+                              <span
+                                data-test="tag"
+                                class="_main_1i6xjbl_31 _sizeXs_1i6xjbl_18 _alignIconLeft_1i6xjbl_7 _main_imuztz_1 wt-col-inline wt-col_align-self_end main-developers-ide-card__tag"
+                                style="
+                                  color: rgb(255, 255, 255);
+                                  background-color: rgb(107, 87, 255);
+                                "
+                                >Free for non-commercial use</span
+                              >
+                              {{end}}
+                            </h3>
+                          </div>
+                        </div>
+
+                        <p
+                          class="_rs-text-2_19db458_1 _rs-typography_theme_dark_19db458_1 _rs-text_hardness_hard_19db458_1 wt-offset-top-8"
+                        >
+                          {{.Describe}}
+                        </p>
+                        <p class="license-key">Click to generate a license</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="wt-col-12 wt-col_align-self_end">
+                    <div
+                      class="wt-row wt-row_size_xs ides-languages-product-card__language-tags wt-offset-top-16 wt-display-sm-none"
+                    >
+                      {{range .Tags}}
+                      <div class="wt-col-inline">
+                        <div
+                          class="_rs-text-3_19db458_1 _rs-typography_theme_dark_19db458_1 _rs-text_hardness_hard_19db458_1 wt-offset-top-8"
+                        >
+                          {{.}}
+                        </div>
+                      </div>
+                      {{end}}
+                    </div>
+                  </div>
+                </div></a
+              >
+              {{end}}
+            </div>
+          </div>
+        </div>
+        <div class="wt-container wt-offset-top-96">
+          <div class="wt-offset-top-48">
+            <h2
+              class="_rs-h2_19db458_1 _rs-typography_theme_dark_19db458_1 _rs-text_hardness_auto_19db458_1 wt-offset-top-96"
+            >
+              Choose the Plugins
+            </h2>
+            <div
+              class="wt-row wt-row_size_m ide-products-section jb-offset-top-16 jb-offset-top-sm-48"
+              id="plugins-products-section"
+            >
+              {{range .plugins}}
+              <a
+                data-product="{{.Name}}"
+                data-product-codes="{{.Code}}"
+                onclick="copyLicense(this)"
+                class="card wt-col-4 wt-col-md-6 wt-col-sm-12 wt-offset-top-32 ides-languages-product-card"
+                ><div
+                  class="wt-row wt-row_size_m ides-languages-product-card__wrap"
+                >
+                  <div class="wt-col-inline">
+                    <div class="wt-row wt-row_size_m wt-row_nowrap">
+                      <div
+                        class="wt-col-inline ides-languages-product-card__icon"
+                      >
+                        <div
+                          class="icon"
+                          role="img"
+                          style="background-image: url('{{.Icon}}')"
+                        ></div>
+                      </div>
+                      <div class="wt-col-inline">
+                        <div
+                          class="wt-row wt-row_size_s wt-row_align-items_center"
+                        >
+                          <div class="wt-col-inline">
+                            <h3
+                              class="_rs-h3_19db458_1 _rs-typography_theme_dark_19db458_1 _rs-text_hardness_auto_19db458_1"
+                            >
+                              {{.Name}} {{if .IsFree}}
+                              <span
+                                data-test="tag"
+                                class="_main_1i6xjbl_31 _sizeXs_1i6xjbl_18 _alignIconLeft_1i6xjbl_7 _main_imuztz_1 wt-col-inline wt-col_align-self_end main-developers-ide-card__tag"
+                                style="
+                                  color: rgb(255, 255, 255);
+                                  background-color: rgb(107, 87, 255);
+                                "
+                                >Free for non-commercial use</span
+                              >
+                              {{end}}
+                            </h3>
+                          </div>
+                        </div>
+
+                        <p
+                          class="_rs-text-2_19db458_1 _rs-typography_theme_dark_19db458_1 _rs-text_hardness_hard_19db458_1 wt-offset-top-8"
+                        >
+                          {{.Describe}}
+                        </p>
+                        <p class="license-key">Click to generate a license</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="wt-col-12 wt-col_align-self_end">
+                    <div
+                      class="wt-row wt-row_size_xs ides-languages-product-card__language-tags wt-offset-top-16 wt-display-sm-none"
+                    >
+                      {{range .Tags}}
+                      <div class="wt-col-inline">
+                        <div
+                          class="_rs-text-3_19db458_1 _rs-typography_theme_dark_19db458_1 _rs-text_hardness_hard_19db458_1 wt-offset-top-8"
+                        >
+                          {{.}}
+                        </div>
+                      </div>
+                      {{end}}
+                    </div>
+                  </div>
+                </div></a
+              >
+              {{end}}
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
+{{end}}
