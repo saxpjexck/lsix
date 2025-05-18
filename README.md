@@ -11,6 +11,11 @@ go-bindata --version
 go-bindata -o internal/util/access.go -pkg util static/... templates/...
 go run cmd/main.go
 ```
+## run it !
+mac linux windows
+```
+make run
+```
 
 ## make it !
 
