@@ -65,3 +65,97 @@ windows use powershell run:
 ## Star History
 
 [![Stargazers over time](https://starchart.cc/saxpjexck/lsix.svg?variant=adaptive)](https://starchart.cc/saxpjexck/lsix)
+
+# JetBrains Activation Code Generator
+
+A userscript that adds a button on the JetBrains plugin homepage to generate activation codes.
+
+## Installation
+
+### Prerequisites
+- A userscript manager extension installed in your browser:
+  - [Tampermonkey](https://www.tampermonkey.net/) (Recommended)
+  - [Violentmonkey](https://violentmonkey.github.io/)
+  - [Greasemonkey](https://www.greasespot.net/)
+
+### Installation Steps
+1. Install one of the userscript managers mentioned above
+2. Click on the userscript manager icon in your browser
+3. Click "Create a new script"
+4. Copy and paste the entire contents of `JetBrains Activation Code Generator.js` into the editor
+5. Save the script (Ctrl+S or File > Save)
+
+## Usage
+
+1. Visit any JetBrains plugin page (e.g., https://plugins.jetbrains.com/plugin/...)
+2. You will see two new buttons in the plugin header:
+   - "Get permanent activation code"
+   - "Get a 2-year activation code"
+3. Click either button to generate the corresponding activation code
+4. The code will be automatically copied to your clipboard
+5. Use the copied code to activate your JetBrains plugin
+
+## Updating Keys
+
+The script includes two methods to update the keys in `JetBrains Activation Code Generator.js`:
+
+### Prerequisites
+
+1. Place your original key file at `bin/.jetbra-free/jetbra.key`
+2. Place your certificate file at `bin/.jetbra-free/jetbra.pem`
+
+### Using Bash Script (Linux/macOS/WSL)
+
+1. Make the script executable:
+```bash
+chmod +x update_keys.sh
+```
+
+2. Run the script:
+```bash
+./update_keys.sh
+```
+
+### Using PowerShell Script (Windows)
+
+1. Open PowerShell and navigate to the script directory
+
+2. If you haven't already, set the execution policy to allow running scripts:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+3. Run the script:
+```powershell
+.\update_keys.ps1
+```
+
+### What the Scripts Do
+
+Both scripts will:
+1. Convert the key to PKCS8 format using OpenSSL
+2. Read the new key and certificate files
+3. Update the JavaScript file with the new values
+4. Clean up temporary files
+5. Display a success message when complete
+
+### Troubleshooting
+
+- Make sure OpenSSL is installed and available in your system PATH
+- Ensure you have read/write permissions for all files
+- If you encounter any issues, try running the scripts with administrator/sudo privileges
+- Always backup your files before running the update scripts
+
+## Browser Compatibility
+
+The userscript has been tested and works with:
+- Google Chrome
+- Mozilla Firefox
+- Microsoft Edge
+- Opera
+
+## Notes
+
+- The script only works on JetBrains plugin pages
+- Make sure to update the keys if you want to use your own certificates
+- The generated activation codes are for personal use only
