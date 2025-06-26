@@ -51,9 +51,10 @@ make run
 mac or linux ：
 
 ```bash
+make install-bindata
+export PATH=$PATH:$(go env GOPATH)/bin
+make build
 make run
-make build-all
-make clean
 ```
 
 windows use powershell run:
