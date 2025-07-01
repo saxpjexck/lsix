@@ -396,7 +396,7 @@ func editVmoptionsFile(path string) error {
 		if strings.Contains(line, addOpens2) {
 			hasAddOpens2 = true
 		}
-		if strings.HasPrefix(line, "-javaagent:") && strings.Contains(line, "=jetbrains") {
+		if strings.HasPrefix(line, "-javaagent:") {
 			hasJavaAgent = true
 			lines = append(lines, agentLine)
 			continue
@@ -486,7 +486,7 @@ func revertVmoptionsFile(path string) error {
 		if trim == addOpens2 {
 			continue
 		}
-		if strings.HasPrefix(trim, "-javaagent:") && strings.Contains(trim, "=jetbrains") {
+		if strings.HasPrefix(trim, "-javaagent:") {
 			continue
 		}
 		lines = append(lines, line)
